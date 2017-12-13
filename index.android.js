@@ -1,6 +1,4 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
  * @flow
  */
 
@@ -9,23 +7,98 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+  Button,
+  Slider,
+  NativeModules
 } from 'react-native';
 
+const SuperpoweredModule = NativeModules.SuperpoweredModule;
+
 export default class ReactNativeSuperpowered extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      init: null,
+      playPause: false,
+      buttonTitle: 'Play',
+    }
+
+    this.playPause = this.playPause.bind(this);
+  }
+
+  componentDidMount() {
+    this.init();
+  }
+
+  async init() {
+    try {
+      let init = await SuperpoweredModule.init();
+
+      this.setState({ init });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async playPause() {
+    try {
+      let playPause = await SuperpoweredModule.playPause();
+      let buttonTitle = 'Play';
+
+      if (this.state.buttonTitle == buttonTitle) {
+        buttonTitle = 'Pause';
+      }
+
+      this.setState({ playPause, buttonTitle });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  updateCrossFader(value) {
+    SuperpoweredModule.crossFader(value);
+  }
+
+  updateFxFlanger(value) {
+    SuperpoweredModule.fxValue(0, value);
+  }
+
+  updateFxFilter(value) {
+    SuperpoweredModule.fxValue(1, value);
+  }
+
+  updateFxRoll(value) {
+    SuperpoweredModule.fxValue(2, value);
+  }
+
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
-        </Text>
+        {
+          this.state.init == "true" &&
+
+            <View>
+              <Button
+                style={styles.button}
+                onPress={this.playPause}
+                title={this.state.buttonTitle}
+              />
+
+            <Text style={styles.text}>Crossfader</Text>
+              <Slider value={0} onValueChange={this.updateCrossFader} />
+
+              <Text style={styles.text}>Flanger</Text>
+              <Slider value={0} onValueChange={this.updateFxFlanger} />
+
+              <Text style={styles.text}>Filter</Text>
+              <Slider value={0} onValueChange={this.updateFxFilter} />
+
+              <Text style={styles.text}>Roll</Text>
+              <Slider value={0} onValueChange={this.updateFxRoll} />
+            </View>
+        }
       </View>
     );
   }
@@ -34,19 +107,14 @@ export default class ReactNativeSuperpowered extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#F5FCFF',
   },
-  welcome: {
-    fontSize: 20,
+  text: {
     textAlign: 'center',
     margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+    width: 270,
   },
 });
 

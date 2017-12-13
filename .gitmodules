@@ -1,0 +1,3 @@
+[submodule "superpowered"]
+	path = superpowered
+	url = https://github.com/superpoweredSDK/Low-Latency-Android-Audio-iOS-Audio-Engine
